@@ -1,5 +1,6 @@
 package org.example.config;
 
+
 import org.example.repositories.UserRepository;
 import org.example.services.impl.UserDetailsServiceImpl;
 import org.springframework.context.annotation.Bean;
@@ -28,7 +29,7 @@ public class AppSecurityConfiguration {
     }
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http, SecurityContextRepository securityContextRepository) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http, SecurityContextRepository securityContextRepository, AuthenticationManager authenticationManager) throws Exception {
         http
                 .authorizeHttpRequests(authorizeHttpRequests ->
                         authorizeHttpRequests
@@ -53,7 +54,8 @@ public class AppSecurityConfiguration {
                 )
                 .securityContext(securityContext ->
                         securityContext.securityContextRepository(securityContextRepository)
-                );
+                )
+                .authenticationManager(authenticationManager);
 
         return http.build();
     }
@@ -78,10 +80,10 @@ public class AppSecurityConfiguration {
 
     @Bean
     public AuthenticationManager authenticationManager(HttpSecurity http, PasswordEncoder passwordEncoder, UserDetailsService userDetailsService) throws Exception {
-        return http.getSharedObject(AuthenticationManagerBuilder.class)
+        AuthenticationManagerBuilder authenticationManagerBuilder = http.getSharedObject(AuthenticationManagerBuilder.class);
+        authenticationManagerBuilder
                 .userDetailsService(userDetailsService)
-                .passwordEncoder(passwordEncoder)
-                .and()
-                .build();
+                .passwordEncoder(passwordEncoder);
+        return authenticationManagerBuilder.build();
     }
 }
